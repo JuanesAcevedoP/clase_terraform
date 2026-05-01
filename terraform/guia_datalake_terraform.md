@@ -6,7 +6,7 @@
 ![alt text](image.png)
 ---
 
-# 2. Buckets: Bronze, Silver, Gold
+# 2. Buckets: raw, staging, analytics
 
 ## Archivo: modules/s3_lake/main.tf
 
@@ -24,12 +24,12 @@ resource "aws_s3_bucket" "this" {
 - `bucket =` → nombre dinámico del bucket
 - `${var.project}` → nombre del proyecto
 - `${var.env}` → ambiente (dev, prod)
-- `${var.bucket_name}` → bronze/silver/gold
+- `${var.bucket_name}` → raw/staging/analytics
 - `${var.account_id}` → evita duplicados globales
 
 Resultado:
 ```
-datalake-dev-bronze-123456789
+datalake-dev-raw-123456789
 ```
 
 ---
@@ -62,15 +62,15 @@ transition {
 # 3. Flujo de Datos entre Buckets
 
 ```
-Bronze (raw CSV)
+raw (raw CSV)
    ↓
 Glue Job
    ↓
-Silver (parquet limpio)
+staging (parquet limpio)
    ↓
 (agregaciones futuras)
    ↓
-Gold
+analytics
 ```
 
 ---
@@ -110,14 +110,14 @@ script_location = var.script_location
 ---
 
 ```hcl
-"--input_path"  = "s3://${var.bronze_bucket}/sales_small.csv"
-"--output_path" = "s3://${var.silver_bucket}/sales/"
+"--input_path"  = "s3://${var.raw_bucket}/sales_small.csv"
+"--output_path" = "s3://${var.staging_bucket}/sales/"
 ```
 
 Aquí ocurre la conexión:
 
-- Entrada → Bronze
-- Salida → Silver
+- Entrada → raw
+- Salida → staging
 
 ---
 
@@ -200,13 +200,13 @@ Action = [
 ]
 ```
 
-- Leer Bronze
+- Leer raw
 
 ```hcl
 "s3:PutObject"
 ```
 
-- Escribir en Silver
+- Escribir en staging
 
 ---
 
@@ -276,7 +276,7 @@ module.glue → input
 
 ```
 IAM Role → Glue Job
-Glue Job → S3 Bronze/Silver
+Glue Job → S3 raw/staging
 CloudWatch → monitorea Glue
 S3 → almacena datos
 ```
@@ -288,8 +288,8 @@ S3 → almacena datos
 1. Se crean buckets
 2. Se crea IAM role
 3. Glue usa ese rol
-4. Job lee Bronze
-5. Escribe Silver
+4. Job lee raw
+5. Escribe staging
 6. CloudWatch monitorea
 
 ---
@@ -326,7 +326,7 @@ terraform plan -var-file="dev.tfvars"
 ```
 Aquí debes ver:
 
-- 3 buckets (bronze, silver, gold)
+- 3 buckets (raw, staging, analytics)
 - IAM role
 - Glue job
 - CloudWatch
@@ -349,11 +349,11 @@ Terraform NO sube archivos automáticamente, así que debes hacerlo manualmente:
 
 - Subir CSV (datos de entrada)
 ```bash
-aws s3 cp sales_small.csv s3://TU-BUCKET-BRONZE/
+aws s3 cp sales_small.csv s3://TU-BUCKET-raw/
 ```
 - Subir script Glue
 ```bash
-aws s3 cp scripts/etl_sales.py s3://TU-BUCKET-BRONZE/scripts/
+aws s3 cp scripts/etl_sales.py s3://TU-BUCKET-raw/scripts/
 ```
 
 
@@ -400,9 +400,9 @@ aws s3 rm s3://TU-BUCKET --recursive
 
 Hazlo para:
 
-bronze
-silver
-gold
+raw
+staging
+analytics
 
 ### 2. Glue Jobs en ejecución
 

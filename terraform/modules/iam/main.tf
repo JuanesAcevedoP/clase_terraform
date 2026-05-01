@@ -15,7 +15,7 @@ resource "aws_iam_role" "glue_role" {
   })
 }
 
-# Policy S3 (bronze → silver + temp)
+# Policy S3 (raw → staging + temp)
 resource "aws_iam_policy" "glue_s3_policy" {
   name = "${var.project}-${var.env}-glue-s3-policy"
 
@@ -29,8 +29,8 @@ resource "aws_iam_policy" "glue_s3_policy" {
           "s3:ListBucket"
         ]
         Resource = [
-          "arn:aws:s3:::${var.bronze_bucket}",
-          "arn:aws:s3:::${var.bronze_bucket}/*"
+          "arn:aws:s3:::${var.raw_bucket}",
+          "arn:aws:s3:::${var.raw_bucket}/*"
         ]
       },
       {
@@ -39,7 +39,7 @@ resource "aws_iam_policy" "glue_s3_policy" {
           "s3:PutObject"
         ]
         Resource = [
-          "arn:aws:s3:::${var.silver_bucket}/*"
+          "arn:aws:s3:::${var.staging_bucket}/*"
         ]
       },
       {
