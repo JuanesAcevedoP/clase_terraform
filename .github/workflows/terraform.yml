@@ -67,7 +67,8 @@ jobs:
       - name: Get Terraform Outputs
         id: outputs
         run: |
-          echo "RAW_BUCKET=$(terraform output -raw raw_bucket_name)" >> $GITHUB_ENV
+          RAW_BUCKET=$(terraform output -raw raw_bucket_name 2>/dev/null | tail -n 1)
+          echo "RAW_BUCKET=$RAW_BUCKET" >> $GITHUB_ENV
 
       # Subir CSV
       - name: Upload CSV
