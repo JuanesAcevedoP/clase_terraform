@@ -35,8 +35,8 @@ jobs:
       - name: Install dependencies
         run: |
           pip install pytest pyspark
-      
-      #Cambiar path
+
+      # Cambiar path
       - name: Set PYTHONPATH
         run: echo "PYTHONPATH=$GITHUB_WORKSPACE/terraform/archivos_para_bronze" >> $GITHUB_ENV
 
@@ -48,6 +48,8 @@ jobs:
       # Terraform
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false 
 
       - name: Terraform Init
         run: terraform init
@@ -61,19 +63,19 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve -var-file="dev.tfvars"
 
-      # Obtener outputs correctamente
+      # Obtener outputs
       - name: Get Terraform Outputs
         id: outputs
         run: |
-          RAW_BUCKET=$(terraform output -raw raw_bucket_name)
-          echo "raw_BUCKET=$RAW_BUCKET" >> $GITHUB_ENV
+          RAW_BUCKET=$(terraform output -raw raw_bucket_name) 
+          echo "RAW_BUCKET=$RAW_BUCKET" >> $GITHUB_ENV       
 
       # Subir CSV
       - name: Upload CSV
         run: |
-          aws s3 cp ../../archivos_para_bronze/sales_small.csv s3://$raw_BUCKET/
+          aws s3 cp ../../archivos_para_bronze/sales_small.csv s3://${{ env.RAW_BUCKET }}/  # ✅ Referencia correcta
 
       # Subir script Glue
       - name: Upload Glue Script
         run: |
-          aws s3 cp ../../archivos_para_bronze/scripts/etl_sales.py s3://$raw_BUCKET/scripts/etl_sales.py
+          aws s3 cp ../../archivos_para_bronze/scripts/etl_sales.py s3://${{ env.RAW_BUCKET }}/scripts/etl_sales.py  # ✅ Referencia correcta
