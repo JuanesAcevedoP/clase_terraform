@@ -11,7 +11,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: infra/terraform/envs/dev
+        working-directory: terraform/envs/dev
 
     steps:
       - name: Checkout repo
@@ -38,12 +38,12 @@ jobs:
       
       #Cambiar path
       - name: Set PYTHONPATH
-        run: echo "PYTHONPATH=$GITHUB_WORKSPACE/infra/terraform/archivos_para_raw" >> $GITHUB_ENV
+        run: echo "PYTHONPATH=$GITHUB_WORKSPACE/terraform/archivos_para_bronze" >> $GITHUB_ENV
 
       # RUN TESTS
       - name: Run Tests
         run: |
-          pytest $GITHUB_WORKSPACE/infra/terraform/archivos_para_raw/tests/
+          pytest $GITHUB_WORKSPACE/terraform/archivos_para_bronze/tests/
 
       # Terraform
       - name: Setup Terraform
