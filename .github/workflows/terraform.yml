@@ -67,9 +67,12 @@ jobs:
       - name: Get Terraform Outputs
         id: outputs
         run: |
-          RAW_BUCKET=$(terraform output -raw raw_bucket_name 2>/dev/null | grep -E '^[a-zA-Z0-9][a-zA-Z0-9._-]+$')
+          RAW_OUTPUT=$(terraform output -raw raw_bucket_name 2>/dev/null)
+          echo "DEBUG RAW OUTPUT: '$RAW_OUTPUT'"
+          echo "DEBUG HEX: $(echo "$RAW_OUTPUT" | xxd | head -5)"
+          RAW_BUCKET=$(echo "$RAW_OUTPUT" | grep -E '^[a-zA-Z0-9][a-zA-Z0-9._-]+$' || true)
           echo "RAW_BUCKET=$RAW_BUCKET" >> $GITHUB_ENV
-          echo "DEBUG: '$RAW_BUCKET'"
+          echo "DEBUG BUCKET: '$RAW_BUCKET'"
 
       # Subir CSV
       - name: Upload CSV
