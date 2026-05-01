@@ -65,7 +65,7 @@ jobs:
       - name: Get Terraform Outputs
         id: outputs
         run: |
-          RAW_BUCKET=$(terraform output -json | jq -r '.raw_bucket_name.value')
+          RAW_BUCKET=$(terraform output -json | sed -n '/^{/,$p' | jq -r '.raw_bucket_name.value')
           echo "raw_BUCKET=$RAW_BUCKET" >> $GITHUB_ENV
 
       # Subir CSV
