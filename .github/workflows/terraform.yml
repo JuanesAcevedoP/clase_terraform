@@ -67,7 +67,13 @@ jobs:
       - name: Get Terraform Outputs
         id: outputs
         run: |
-          RAW_BUCKET=$(terraform output -raw raw_bucket_name 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' | cut -d'╷' -f1)
+          RAW_BUCKET=$(terraform output -raw raw_bucket_name 2>/dev/null | python3 -c "
+          import sys, re
+          raw = sys.stdin.read()
+          clean = re.sub(r'\x1b\[[0-9;]*m', '', raw)
+          bucket = clean.split('╷')[0].strip()
+          print(bucket)
+          ")
           echo "DEBUG BUCKET: '$RAW_BUCKET'"
           echo "RAW_BUCKET=$RAW_BUCKET" >> $GITHUB_ENV
 
